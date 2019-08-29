@@ -62,6 +62,7 @@ function hex2littleEndian(hexValue) {
         hexParts.push(hexValue.substr(i, 2));
     return hexParts.reverse().join("");
 }
+
 var _2bytesLimit = Math.pow(16, 4);
 var _4bytesLimit = Math.pow(16, 8);
 
@@ -91,34 +92,6 @@ function p2pkh(address) {
     return resultScript;
 }
 
-function str2hex(str) {
-    if (Array.isArray(str))
-        return str.map(function (part) {
-            return str2hex(part);
-        });
-    var result = "";
-    for (var i = 0; i < str.length; i++) {
-        var hex = str.charCodeAt(i).toString(16);
-        result += ("0" + hex).slice(-2);
-    }
-    return result;
-}
-
-function op_return(hexValues, use_op_false) {
-    if (use_op_false === undefined)
-        use_op_false = true;
-    if (typeof (hexValues) == "string")
-        hexValues = [hexValues];
-    if (!Array.isArray(hexValues))
-        throw new Error("op_return method expects an array of hexadecimal strings");
-    var resultScript = use_op_false ? "006a" : "6a";
-    for (var i = 0; i < hexValues.length; i++) {
-        resultScript = resultScript + hexValueInScript(hexValues[i]);
-    }
-    return resultScript;
-}
 module.exports = {
-    p2pkh: p2pkh,
-    op_return: op_return,
-    str2hex: str2hex,
+    p2pkh: p2pkh
 };
