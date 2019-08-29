@@ -1,5 +1,5 @@
 var express = require('express');
-var scriptUtils = require("../js/scriptUtils");
+var scriptUtils = require("../utils/scriptUtils");
 
 var router = express.Router();
 
