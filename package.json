@@ -6,6 +6,8 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@moneybutton/express-paymail": "^0.24.4",
+    "@moneybutton/paymail-client": "^0.24.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",

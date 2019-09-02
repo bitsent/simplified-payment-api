@@ -1,0 +1,6 @@
+{
+    "baseUrl":"https://api.bitsent.net/",
+    "receiveAddress" : "your bitcoin address",
+    "serverPaymail" : "yourname@example.com",
+    "privkey" : "Your signing public key"
+}
