@@ -1,4 +1,5 @@
 {
+    "port": 3000,
     "baseUrl":"https://api.bitsent.net/",
     "receiveAddress" : "your bitcoin address",
     "serverPaymail" : "yourname@example.com",
