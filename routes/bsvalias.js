@@ -18,6 +18,8 @@ var callbacks = {
   }
 }
 
-var create = function (BASE_URL) { buildRouter(BASE_URL, callbacks) }
+var create = function (BASE_URL) { 
+  return buildRouter(BASE_URL, callbacks);
+}
 
 module.exports = { create }
