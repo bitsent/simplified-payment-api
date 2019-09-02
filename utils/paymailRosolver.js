@@ -7,7 +7,7 @@ var settings = require('../settings.json')
 
 var client = new paymail.PaymailClient(dns, fetch)
 
-async function getAddress (paymailAddress) {
+async function getOutputScript (paymailAddress) {
   var sender = {
     senderHandle: paymailAddress,
     dt: new Date().toISOString()
@@ -26,6 +26,6 @@ function sign (data) {
 }
 
 module.exports = {
-  getAddress,
+  getOutputScript,
   sign
 }

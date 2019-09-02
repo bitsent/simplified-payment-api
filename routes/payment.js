@@ -14,13 +14,14 @@ var DONATION_MERCHANT_DATA = 'donation'
 var DONATION_AMOUNT = BSC_SATS * 0.01
 
 var ADDRESS_REGEX = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/
+var HEX_REGEX = /^[0-9a-fA-F]+$/
 
-function constructPaymentRequest (address, amount, memo, merchantData) {
+function constructPaymentRequest (script, amount, memo, merchantData) {
   var request = {
     'network': 'bitcoin',
     'outputs': {
       'amount': amount,
-      'script': scriptUtils.p2pkh(address)
+      'script': script
     },
     'creationTimestamp': Math.floor(+new Date() / 1000),
     'memo': memo,
@@ -36,7 +37,7 @@ function constructPaymentRequest (address, amount, memo, merchantData) {
 router.get('/donate', function (req, res, next) {
   console.log('/donate')
   res.status(200).json(
-    constructPaymentRequest(DONATION_ADDRESS, DONATION_AMOUNT, DONATION_MEMO, DONATION_MERCHANT_DATA))
+    constructPaymentRequest(scriptUtils.p2pkh(DONATION_ADDRESS), DONATION_AMOUNT, DONATION_MEMO, DONATION_MERCHANT_DATA))
 })
 
 // GET a BIP-270 Payment Request for an address
@@ -48,20 +49,20 @@ router.get('/address/:addr/:amount', function (req, res, next) {
   if (isNaN(amount) || amount < 1000) { res.status(400).json({ message: 'Amount is invalid or too small.' }) }
 
   res.status(200).json(
-    constructPaymentRequest(addr, amount, 'Pay to ' + addr))
+    constructPaymentRequest(scriptUtils.p2pkh(addr), amount, 'Pay to ' + addr))
 })
 
 // GET a BIP-270 Payment Request for an Paymail
 router.get('/paymail/:paymail/:amount', function (req, res, next) {
   var paymail = req.params.paymail
   var amount = parseInt(req.params.amount)
-  paymailRosolverUtils.getAddress(paymail)
-    .then(addr => {
-      if (!ADDRESS_REGEX.test(addr)) { res.status(400).json({ message: 'Invalid bitcoin address.' }) }
+  paymailRosolverUtils.getOutputScript(paymail)
+    .then(outputScript => {
+      if (!HEX_REGEX.test(outputScript)) { res.status(400).json({ message: 'Invalid bitcoin outputScript.' }) }
       if (isNaN(amount) || amount < 1000) { res.status(400).json({ message: 'Amount is invalid or too small.' }) }
 
       res.status(200).json(
-        constructPaymentRequest(addr, amount, 'Pay to ' + addr))
+        constructPaymentRequest(outputScript, amount, 'Pay to ' + paymail))
     })
 })
 
