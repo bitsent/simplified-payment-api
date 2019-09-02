@@ -3,7 +3,7 @@ var express = require('express')
 var path = require('path')
 var logger = require('morgan')
 
-var settings = require('../settings.json')
+var settings = require('./settings.json')
 var paymentRouter = require('./routes/payment')
 var bsvaliasRouter = require('./routes/bsvalias').create(settings.baseUrl)
 
