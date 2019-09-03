@@ -19,10 +19,12 @@ var HEX_REGEX = /^[0-9a-fA-F]+$/
 function constructPaymentRequest (script, amount, memo, merchantData) {
   var request = {
     'network': 'bitcoin',
-    'outputs': {
-      'amount': amount,
-      'script': script
-    },
+    'outputs': [
+      {
+        'amount': amount,
+        'script': script
+      }
+    ],
     'creationTimestamp': Math.floor(+new Date() / 1000),
     'memo': memo,
     'paymentUrl': settings.baseUrl + 'payment/pay'
@@ -36,8 +38,9 @@ function constructPaymentRequest (script, amount, memo, merchantData) {
 // GET a BIP-270 Payment Request for a donation to me
 router.get('/donate', function (req, res, next) {
   console.log('/donate')
-  res.status(200).json(
-    constructPaymentRequest(scriptUtils.p2pkh(DONATION_ADDRESS), DONATION_AMOUNT, DONATION_MEMO, DONATION_MERCHANT_DATA))
+  var request = constructPaymentRequest(scriptUtils.p2pkh(DONATION_ADDRESS), DONATION_AMOUNT, DONATION_MEMO, DONATION_MERCHANT_DATA)
+  request.outputs.push({ 'amount': 0, 'script': '006a1949206a75737420646f6e6174656420746f2042697453656e74' })
+  res.status(200).json(request)
 })
 
 // GET a BIP-270 Payment Request for an address
