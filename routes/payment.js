@@ -2,6 +2,7 @@ var express = require('express')
 var scriptUtils = require('../utils/scriptUtils')
 var paymailRosolverUtils = require('../utils/paymailRosolver')
 var settings = require('../settings.json')
+var request = require('request')
 
 var router = express.Router()
 
@@ -15,6 +16,8 @@ var DONATION_AMOUNT = BSC_SATS * 0.01
 
 var ADDRESS_REGEX = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/
 var HEX_REGEX = /^[0-9a-fA-F]+$/
+
+var BITINDEX_TX_SEND = 'https://api.bitindex.network/api/v3/main/tx/send'
 
 function constructPaymentRequest (script, amount, memo, merchantData) {
   var request = {
@@ -70,12 +73,48 @@ router.get('/paymail/:paymail/:amount', function (req, res, next) {
 })
 
 // POST a BIP-270 Patment
-// TODO: Implement this endpoint
+// TODO: Fully Implement this endpoint
 router.post('/pay', function (req, res, next) {
-  console.log(JSON.stringify(req.body))
+  // Payment {
+  //   merchantData // string. optional.
+  //   transaction // a hex-formatted (and fully-signed and valid) transaction. required.
+  //   refundTo // string. paymail to send a refund to. optional.
+  //   memo // string. optional.
+  // }
 
-  res.status(418).json({
-    message: 'Nothing to see here. Move along. Your request body was : ' + req.body
+  // PaymentACK {
+  //   payment // Payment. required. (Copy of the Payment message)
+  //   memo // string. optional. (result or error message)
+  //   error // number. optional. (0 or 1)
+  // }
+
+  if (!req.body.transaction) {
+    res.status(400).json({ payment: req.body, error: 1, memo: "No 'transaction' parameter passed" })
+  }
+  if (typeof req.body.transaction !== 'string' || !HEX_REGEX.test(req.body.transaction)) {
+    res.status(400).json({ payment: req.body, error: 1, memo: "'transaction' should be a Hex String" })
+  }
+
+  // TODO: If transaction is already broadcasted, return "200: Already Broadcasted"
+
+  request({
+    method: 'POST',
+    url: BITINDEX_TX_SEND,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: { rawtx: req.body.transaction }
+  }, (error, response, body) => {
+    if (error) {
+      res.status(400).json({ payment: req.body, error: 1, memo: JSON.stringify(error) })
+    } else if (body.message) {
+      res.status(400).json({ payment: req.body, error: 1, memo: body.message })
+    } else if (body.txid) {
+      res.status(200).json({ payment: req.body, error: 0, memo: 'Broadcasted: ' + body.txid })
+    } else {
+      res.status(200).json({ payment: req.body, error: 0, memo: 'Something unexpected happened' })
+    }
   })
 })
 
