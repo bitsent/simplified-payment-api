@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "restart": "pm2 stop 0; pm2 del 0; git pull; npm i; pm2 start \"npm run start\"; pm2 log 0"
   },
   "dependencies": {
     "@moneybutton/express-paymail": "^0.24.4",
