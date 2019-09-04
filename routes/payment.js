@@ -3,6 +3,7 @@ var scriptUtils = require('../utils/scriptUtils')
 var paymailRosolverUtils = require('../utils/paymailRosolver')
 var settings = require('../settings.json')
 var request = require('request')
+var bsv = require('@moneybutton/paymail-client/node_modules/bsv')
 
 var router = express.Router()
 
@@ -39,15 +40,17 @@ function constructPaymentRequest (script, amount, memo, merchantData) {
 }
 
 // GET a BIP-270 Payment Request for a donation to me
-router.get('/donate', function (req, res, next) {
+router.get('/donate', paymentRequestForDonation)
+function paymentRequestForDonation (req, res, next) {
   console.log('/donate')
   var request = constructPaymentRequest(scriptUtils.p2pkh(DONATION_ADDRESS), DONATION_AMOUNT, DONATION_MEMO, DONATION_MERCHANT_DATA)
   request.outputs.push({ 'amount': 0, 'script': '006a1949206a75737420646f6e6174656420746f2042697453656e74' })
   res.status(200).json(request)
-})
+}
 
 // GET a BIP-270 Payment Request for an address
-router.get('/address/:addr/:amount', function (req, res, next) {
+router.get('/address/:addr/:amount', paymentRequestToAddress)
+function paymentRequestToAddress (req, res, next) {
   var addr = req.params.addr
   var amount = parseInt(req.params.amount)
 
@@ -56,10 +59,11 @@ router.get('/address/:addr/:amount', function (req, res, next) {
 
   res.status(200).json(
     constructPaymentRequest(scriptUtils.p2pkh(addr), amount, 'Pay to ' + addr))
-})
+}
 
 // GET a BIP-270 Payment Request for an Paymail
-router.get('/paymail/:paymail/:amount', function (req, res, next) {
+router.get('/paymail/:paymail/:amount', paymentRequestToPaymail)
+function paymentRequestToPaymail (req, res, next) {
   var paymail = req.params.paymail
   var amount = parseInt(req.params.amount)
   paymailRosolverUtils.getOutputScript(paymail)
@@ -70,11 +74,12 @@ router.get('/paymail/:paymail/:amount', function (req, res, next) {
       res.status(200).json(
         constructPaymentRequest(outputScript, amount, 'Pay to ' + paymail))
     })
-})
+}
 
 // POST a BIP-270 Patment
 // TODO: Fully Implement this endpoint
-router.post('/pay', function (req, res, next) {
+router.post('/pay', bip270Payment)
+function bip270Payment (req, res, next) {
   // Payment {
   //   merchantData // string. optional.
   //   transaction // a hex-formatted (and fully-signed and valid) transaction. required.
@@ -95,7 +100,7 @@ router.post('/pay', function (req, res, next) {
     res.status(400).json({ payment: req.body, error: 1, memo: "'transaction' should be a Hex String" })
   }
 
-  // TODO: If transaction is already broadcasted, return "200: Already Broadcasted"
+  var txid = bsv.util.buffer.reverse(bsv.crypto.Hash.sha256sha256(Buffer.from(req.body.transaction, 'hex'))).toString('hex')
 
   request({
     method: 'POST',
@@ -104,10 +109,12 @@ router.post('/pay', function (req, res, next) {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: { rawtx: req.body.transaction }
+    body: JSON.stringify({ rawtx: req.body.transaction })
   }, (error, response, body) => {
     if (error) {
       res.status(400).json({ payment: req.body, error: 1, memo: JSON.stringify(error) })
+    } else if (body.message && body.message.indexOf('transaction already in block chain') > 0) {
+      res.status(200).json({ payment: req.body, error: 0, memo: 'transaction already in block chain: ' + body.txid })
     } else if (body.message) {
       res.status(400).json({ payment: req.body, error: 1, memo: body.message })
     } else if (body.txid) {
@@ -116,6 +123,6 @@ router.post('/pay', function (req, res, next) {
       res.status(200).json({ payment: req.body, error: 0, memo: 'Something unexpected happened' })
     }
   })
-})
+}
 
 module.exports = router
