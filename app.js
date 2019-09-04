@@ -6,6 +6,7 @@ var logger = require('morgan')
 var settings = require('./settings.json')
 var paymentRouter = require('./routes/payment')
 var bsvaliasRouter = require('./routes/bsvalias').create(settings.baseUrl)
+var swaggerDocRouter = require('./routes/swaggerDoc')
 
 var app = express()
 
@@ -18,6 +19,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(bsvaliasRouter)
 app.use('/payment', paymentRouter)
+
+app.use('/', swaggerDocRouter.serve, swaggerDocRouter.setup)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -39,7 +39,18 @@ function constructPaymentRequest (script, amount, memo, merchantData) {
   return request
 }
 
-// GET a BIP-270 Payment Request for a donation to me
+/**
+ * @swagger
+ *    /payment/donate:
+ *      get:
+ *        summary: Returns a bip270 payment request object, that requests a donation payment to BitSent API
+ *        description: Returns a bip270 payment request object, that requests a donation payment to BitSent API. All donations will be used to improve the free service (like by paying for better hosting for example).
+ *        responses:
+ *          '200':
+ *            description: A bup270 payment request object.
+ *            content:
+ *              application/json
+ */
 router.get('/donate', paymentRequestForDonation)
 function paymentRequestForDonation (req, res, next) {
   console.log('/donate')
@@ -48,7 +59,29 @@ function paymentRequestForDonation (req, res, next) {
   res.status(200).json(request)
 }
 
-// GET a BIP-270 Payment Request for an address
+/**
+ * @swagger
+ *    /payment/address/{addr}/{amount}:
+ *      get:
+ *        summary: Returns a bip270 payment request object, for sending the specified amount to the specified bitcoin address.
+ *        description: The specified amount must be in satoshies and not smaller than 1000. The bitcoin address must be a valid address.
+ *        parameters:
+ *          - name: addr
+ *            in: path
+ *            required: true
+ *            description: The bitcoin address to pay to
+ *            default: 1Dmq5JKtWu4yZRLWBBKh3V2koeemNTYXAY
+ *          - name: amount
+ *            in: path
+ *            required: true
+ *            description: The amount to pay in satoshies
+ *            default: 500000
+ *        responses:
+ *          '200':
+ *            description: A bup270 payment request object.
+ *            content:
+ *              application/json
+ */
 router.get('/address/:addr/:amount', paymentRequestToAddress)
 function paymentRequestToAddress (req, res, next) {
   var addr = req.params.addr
@@ -61,7 +94,29 @@ function paymentRequestToAddress (req, res, next) {
     constructPaymentRequest(scriptUtils.p2pkh(addr), amount, 'Pay to ' + addr))
 }
 
-// GET a BIP-270 Payment Request for an Paymail
+/**
+ * @swagger
+ *    /payment/paymail/{paymail}/{amount}:
+ *      get:
+ *        summary: Returns a bip270 payment request object, for sending the specified amount to the specified paymail.
+ *        description: The specified amount must be in satoshies and not smaller than 1000. The paymail must be a valid paymail.
+ *        parameters:
+ *          - name: paymail
+ *            in: path
+ *            required: true
+ *            description: The bitcoin paymail to pay to
+ *            default: aleks@simply.cash
+ *          - name: amount
+ *            in: path
+ *            required: true
+ *            description: The amount to pay in satoshies
+ *            default: 500000
+ *        responses:
+ *          '200':
+ *            description: A bup270 payment request object.
+ *            content:
+ *              application/json
+ */
 router.get('/paymail/:paymail/:amount', paymentRequestToPaymail)
 function paymentRequestToPaymail (req, res, next) {
   var paymail = req.params.paymail
@@ -76,23 +131,41 @@ function paymentRequestToPaymail (req, res, next) {
     })
 }
 
-// POST a BIP-270 Patment
-// TODO: Fully Implement this endpoint
+/**
+ * @swagger
+ *    /payment/pay:
+ *      post:
+ *        summary: Endpoint for receiving payment messages.
+ *        description: Accepts a Payment Object body (transaction = "{tx hex}") and returns a PaymentACK Object JSON, as described in BIP-0270.
+ *        requestBody:
+ *          required: true
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  transaction:
+ *                    type: string
+ *                    description: hexadecimal transaction string
+ *                  merchantData:
+ *                    type: string
+ *                    description: helps the accepting server recognize the specific payment. (not used in this implementation)
+ *                  refundTo:
+ *                    type: string
+ *                    description: refund address in case refunding is needed. (not used in this implementation)
+ *                  memo:
+ *                    type: string
+ *                    description: A plain text note from the customer to the payment server. (not used in this implementation)
+ *                  required:
+ *                    - transaction
+ *        responses:
+ *          '200':
+ *            description: If the payment was succesfully broadcasted, or it is already present in the blockchain, a PaymentACK object is returned (as described in BIP-0270)
+ *          '400':
+ *            description: If the payment invalid, or there was a different error, a PaymentACK object with an error is returned (as described in BIP-0270)
+ */
 router.post('/pay', bip270Payment)
 function bip270Payment (req, res, next) {
-  // Payment {
-  //   merchantData // string. optional.
-  //   transaction // a hex-formatted (and fully-signed and valid) transaction. required.
-  //   refundTo // string. paymail to send a refund to. optional.
-  //   memo // string. optional.
-  // }
-
-  // PaymentACK {
-  //   payment // Payment. required. (Copy of the Payment message)
-  //   memo // string. optional. (result or error message)
-  //   error // number. optional. (0 or 1)
-  // }
-
   if (!req.body.transaction) {
     res.status(400).json({ payment: req.body, error: 1, memo: "No 'transaction' parameter passed" })
   }
