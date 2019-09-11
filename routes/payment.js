@@ -41,26 +41,6 @@ function constructPaymentRequest (script, amount, memo, merchantData) {
 
 /**
  * @swagger
- *    /payment/donate:
- *      get:
- *        summary: Returns a bip270 payment request object, that requests a donation payment to BitSent API
- *        description: Returns a bip270 payment request object, that requests a donation payment to BitSent API. All donations will be used to improve the free service (like by paying for better hosting for example).
- *        responses:
- *          '200':
- *            description: A bup270 payment request object.
- *            content:
- *              application/json
- */
-router.get('/donate', paymentRequestForDonation)
-function paymentRequestForDonation (req, res, next) {
-  console.log('/donate')
-  var request = constructPaymentRequest(scriptUtils.p2pkh(DONATION_ADDRESS), DONATION_AMOUNT, DONATION_MEMO, DONATION_MERCHANT_DATA)
-  request.outputs.push({ 'amount': 0, 'script': '006a1949206a75737420646f6e6174656420746f2042697453656e74' })
-  res.status(200).json(request)
-}
-
-/**
- * @swagger
  *    /payment/address/{addr}/{amount}:
  *      get:
  *        summary: Returns a bip270 payment request object, for sending the specified amount to the specified bitcoin address.
