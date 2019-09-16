@@ -5,6 +5,7 @@ var logger = require('morgan')
 
 var settings = require('./settings.json')
 var paymentRouter = require('./routes/payment')
+var paymailRouter = require('./routes/paymail')
 var bsvaliasRouter = require('./routes/bsvalias').create(settings.baseUrl)
 var swaggerDocRouter = require('./routes/swaggerDoc')
 
@@ -19,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(bsvaliasRouter)
 app.use('/payment', paymentRouter)
+app.use('/paymail', paymailRouter)
 
 app.use('/', swaggerDocRouter.serve, swaggerDocRouter.setup)
 

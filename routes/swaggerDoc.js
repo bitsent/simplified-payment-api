@@ -14,7 +14,7 @@ var options = {
     }
   },
   // List of files to be processes. You can also set globs './routes/*.js'
-  apis: ['./routes/payment.js']
+  apis: ['./routes/paymail.js', './routes/payment.js']
 }
 
 var specs = swaggerJsdoc(options)
