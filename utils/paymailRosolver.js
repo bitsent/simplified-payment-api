@@ -6,10 +6,11 @@ var settings = require('../settings.json')
 
 var client = new paymail.PaymailClient(dns, fetch)
 
+var privkey = bsv.PrivateKey.fromString(settings.privkey)
+var pubkey = bsv.PublicKey.fromPrivateKey(privkey)
+
 async function getOutputScript (paymailAddress) {
   console.log('resolving : ' + paymailAddress)
-  var privkey = bsv.PrivateKey.fromString(settings.privkey)
-  var pubkey = bsv.PublicKey.fromPrivateKey(privkey)
   var out = await client.getOutputFor(paymailAddress, {
     senderName: 'BitSent API',
     senderHandle: settings.serverPaymail,
