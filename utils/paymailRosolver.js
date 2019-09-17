@@ -12,7 +12,7 @@ async function getOutputScript (paymailAddress) {
   var pubkey = bsv.PublicKey.fromPrivateKey(privkey)
   var out = await client.getOutputFor(paymailAddress, {
     senderName: 'BitSent API',
-    senderHandle: paymailAddress,
+    senderHandle: settings.serverPaymail,
     dt: new Date().toISOString(),
     amount: 0,
     purpose: 'Request from a BitSent API user',
