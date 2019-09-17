@@ -1,5 +1,6 @@
 var paymail = require('@moneybutton/paymail-client')
-var bsv = require('@moneybutton/paymail-client/node_modules/bsv')
+var bsv = require('bsv')
+var bsvMessage = require('bsv/message')
 
 var fetch = require('isomorphic-fetch')
 var dns = require('dns')
@@ -21,8 +22,8 @@ async function getOutputScript (paymailAddress) {
 function sign (data) {
   var privateKey = bsv.PrivateKey.fromString(settings.privkey)
   var hash = bsv.crypto.Hash.sha256(Buffer.from(data))
-  var sig1 = bsv.crypto.ECDSA.sign(hash, privateKey)
-  return sig1.toString('hex')
+  var sig = bsvMessage.sign(hash, privateKey)
+  return sig.toString('hex')
 }
 
 module.exports = {
