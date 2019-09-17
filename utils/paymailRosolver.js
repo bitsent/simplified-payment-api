@@ -14,7 +14,7 @@ async function getOutputScript (paymailAddress) {
     senderHandle: paymailAddress,
     dt: new Date().toISOString(),
     amount: 0,
-    purpose: '.',
+    purpose: 'Request from a BitSent API user',
     pubkey: pubkey.toHex()
   }, privkey.toHex())
   return out
