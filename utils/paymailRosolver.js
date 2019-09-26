@@ -11,14 +11,19 @@ var pubkey = bsv.PublicKey.fromPrivateKey(privkey)
 
 async function getOutputScript (paymailAddress) {
   console.log('resolving : ' + paymailAddress)
-  var out = await client.getOutputFor(paymailAddress, {
+  
+  var senderInfo = {
     senderName: 'BitSent API',
     senderHandle: settings.serverPaymail,
-    dt: new Date().toISOString(),
     amount: 100000,
+    dt: new Date().toISOString(),
     purpose: 'Request from a BitSent API user',
-    pubkey: pubkey.toHex()
-  }, privkey.toHex())
+  }
+  
+  senderInfo.signature = VerifiableMessage
+    .forBasicAddressResolution(senderInfo).sign(privkey.toHex())
+  
+  var out = await client.getOutputFor(paymailAddress, senderInfo)
   return out
 }
 
