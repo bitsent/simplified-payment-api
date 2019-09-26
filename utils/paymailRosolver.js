@@ -18,11 +18,12 @@ async function getOutputScript (paymailAddress) {
     amount: 100000,
     dt: new Date().toISOString(),
     purpose: 'Request from a BitSent API user',
+    pubkey: pubkey.toHex()
   }
   
   senderInfo.signature = paymail.VerifiableMessage
     .forBasicAddressResolution(senderInfo).sign(privkey.toHex())
-  
+
   var out = await client.getOutputFor(paymailAddress, senderInfo)
   return out
 }
