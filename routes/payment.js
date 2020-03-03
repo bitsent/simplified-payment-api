@@ -177,7 +177,7 @@ function bip270Payment (req, res, next) {
     } else if (body.txid) {
       res.status(200).json({ payment: req.body, error: 0, memo: 'Broadcasted: ' + body.txid })
     } else {
-      res.status(200).json({ payment: req.body, error: 0, memo: 'Something unexpected happened' })
+      res.status(400).json({ payment: req.body, error: 0, memo: 'Something unexpected happened' })
     }
   })
 }
