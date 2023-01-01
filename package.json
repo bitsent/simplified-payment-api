@@ -8,8 +8,8 @@
     "restart": "pm2 stop 0; pm2 del 0; git pull; npm i; pm2 start \"npm run start\"; pm2 log 0"
   },
   "dependencies": {
-    "@moneybutton/express-paymail": "^0.24.4",
-    "@moneybutton/paymail-client": "^0.24.4",
+    "@moneybutton/express-paymail": "^0.39.0",
+    "@moneybutton/paymail-client": "^0.39.0",
     "bsv": "^0.30.0",
     "debug": "~2.6.9",
     "express": "~4.16.1",
